@@ -3,6 +3,7 @@ import '../../services/api_service.dart';
 import '../../services/storage_service.dart';
 import '../../core/constants/api_constants.dart';
 import 'user_model.dart';
+import '../../core/utils/snackbar_utils.dart';
 
 // Service Providers
 final storageProvider = Provider((ref) => StorageService());
@@ -74,7 +75,9 @@ class AuthNotifier extends Notifier<AuthState> {
         return true;
       }
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      final errorMsg = e.toString();
+      state = state.copyWith(isLoading: false, error: errorMsg);
+      SnackbarUtils.showError('Registration failed: Please check your details');
     }
     return false;
   }
@@ -83,7 +86,7 @@ class AuthNotifier extends Notifier<AuthState> {
     final api = ref.read(apiServiceProvider);
     final storage = ref.read(storageProvider);
 
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, error: null);
     try {
       final response = await api.post(ApiConstants.login, data: {
         'email': email,
@@ -102,6 +105,7 @@ class AuthNotifier extends Notifier<AuthState> {
       }
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
+      SnackbarUtils.showError('Login failed: Invalid email or password');
     }
     return false;
   }

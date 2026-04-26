@@ -1,7 +1,7 @@
 class ApiConstants {
-  // Use 10.0.2.2 for Android Emulator, localhost for iOS/Web
-  // and your PC's IP for real devices.
-  static const String baseUrl = 'http://10.0.2.2:3000/api'; 
+  // Since you ran 'adb reverse tcp:3000 tcp:3000', 
+  // your phone now sees the backend at 127.0.0.1
+  static const String baseUrl = 'http://127.0.0.1:3000/api'; 
   
   static const String register = '/auth/register';
   static const String login = '/auth/login';
