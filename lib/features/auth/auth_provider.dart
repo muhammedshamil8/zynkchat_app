@@ -25,20 +25,23 @@ class AuthState {
   }
 }
 
-// Auth Notifier
-class AuthNotifier extends StateNotifier<AuthState> {
-  final ApiService _api;
-  final StorageService _storage;
-
-  AuthNotifier(this._api, this._storage) : super(AuthState()) {
-    checkAuth();
+// Auth Notifier (Modern Riverpod 3.0 Notifier)
+class AuthNotifier extends Notifier<AuthState> {
+  @override
+  AuthState build() {
+    // Initialize auth check without blocking
+    Future.microtask(() => checkAuth());
+    return AuthState();
   }
 
   Future<void> checkAuth() async {
-    final token = await _storage.getAccessToken();
+    final storage = ref.read(storageProvider);
+    final api = ref.read(apiServiceProvider);
+    
+    final token = await storage.getAccessToken();
     if (token != null) {
       try {
-        final response = await _api.get(ApiConstants.users + '/me');
+        final response = await api.get('${ApiConstants.users}/me');
         if (response.data['success']) {
           state = state.copyWith(user: UserModel.fromJson(response.data['data']));
         }
@@ -49,9 +52,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<bool> register(String name, String email, String password) async {
+    final api = ref.read(apiServiceProvider);
+    final storage = ref.read(storageProvider);
+
     state = state.copyWith(isLoading: true);
     try {
-      final response = await _api.post(ApiConstants.register, data: {
+      final response = await api.post(ApiConstants.register, data: {
         'name': name,
         'email': email,
         'password': password,
@@ -60,7 +66,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       if (response.data['success']) {
         final userData = response.data['data'];
         final user = UserModel.fromJson(userData['user']);
-        await _storage.saveTokens(
+        await storage.saveTokens(
           access: userData['accessToken'],
           refresh: userData['refreshToken'],
         );
@@ -74,9 +80,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<bool> login(String email, String password) async {
+    final api = ref.read(apiServiceProvider);
+    final storage = ref.read(storageProvider);
+
     state = state.copyWith(isLoading: true);
     try {
-      final response = await _api.post(ApiConstants.login, data: {
+      final response = await api.post(ApiConstants.login, data: {
         'email': email,
         'password': password,
       });
@@ -84,7 +93,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       if (response.data['success']) {
         final userData = response.data['data'];
         final user = UserModel.fromJson(userData['user']);
-        await _storage.saveTokens(
+        await storage.saveTokens(
           access: userData['accessToken'],
           refresh: userData['refreshToken'],
         );
@@ -98,11 +107,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> logout() async {
-    await _storage.clearAuth();
+    final storage = ref.read(storageProvider);
+    await storage.clearAuth();
     state = AuthState();
   }
 }
 
-final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-  return AuthNotifier(ref.read(apiServiceProvider), ref.read(storageProvider));
-});
+// Global Auth Provider
+final authProvider = NotifierProvider<AuthNotifier, AuthState>(AuthNotifier.new);

@@ -38,8 +38,22 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: build/app/outputs/flutter-apk/app-release.apk
-          name: ZynkChat Release ${{ github.ref_name }}
+          name: ZynkChat ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
+          body: |
+            ### 🚀 ZynkChat ${{ github.ref_name }} 
+            
+            **Features & Improvements:**
+            - ✨ Modern Dark UI with Premium Typography (Outfit)
+            - 🔐 Secure JWT Authentication (Access + Refresh)
+            - 🕵️ User Discovery & Global Search
+            - ⚡ Live Real-time Backend Integration
+            
+            **Technical Notes:**
+            - Built with Flutter 3.29 & Riverpod 3.0
+            - Optimized Release APK
+            
+            *If you face issues starting the app, please check your network connection to the backend API.*
           draft: false
           prerelease: false
         env:
