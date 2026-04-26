@@ -18,6 +18,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
 
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the chat logic with the receiver's ID
+    Future.microtask(() {
+      ref.read(chatProviderFamily(widget.receiver.id).notifier).init(widget.receiver.id);
+    });
+  }
+
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(

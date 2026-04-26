@@ -5,7 +5,7 @@ import '../auth/auth_provider.dart';
 import 'message_model.dart';
 import '../../core/constants/api_constants.dart';
 
-// Provider for SocketService
+// Service Provider
 final socketProvider = Provider((ref) {
   final service = SocketService(ref.read(storageProvider));
   service.connect();
@@ -26,23 +26,22 @@ class ChatState {
   }
 }
 
-// Modern Riverpod 3.0 FamilyNotifier
-class ChatNotifier extends FamilyNotifier<ChatState, String> {
+// Using Notifier (Riverpod 3.0 compatible)
+class ChatNotifier extends Notifier<ChatState> {
+  late String _receiverId;
+
   @override
-  ChatState build(String arg) {
-    // Start initialization logic
-    Future.microtask(() => _init());
-    return ChatState();
+  ChatState build() => ChatState();
+
+  void init(String receiverId) {
+    _receiverId = receiverId;
+    _fetchHistory();
+    _setupListeners();
   }
 
-  String get _receiverId => arg;
-
-  void _init() {
+  void _setupListeners() {
     final socketService = ref.read(socketProvider);
     
-    fetchHistory();
-    
-    // Listen for incoming messages
     socketService.socket.on('newMessage', (data) {
       final message = MessageModel.fromJson(data);
       if (message.sender == _receiverId || message.receiver == _receiverId) {
@@ -50,7 +49,6 @@ class ChatNotifier extends FamilyNotifier<ChatState, String> {
       }
     });
 
-    // Listen for status updates
     socketService.socket.on('messageStatusUpdate', (data) {
       final String messageId = data['messageId'];
       final String status = data['status'];
@@ -73,7 +71,7 @@ class ChatNotifier extends FamilyNotifier<ChatState, String> {
     });
   }
 
-  Future<void> fetchHistory() async {
+  Future<void> _fetchHistory() async {
     final api = ref.read(apiServiceProvider);
     state = state.copyWith(isLoading: true);
     try {
@@ -90,14 +88,14 @@ class ChatNotifier extends FamilyNotifier<ChatState, String> {
 
   void sendMessage(String content) {
     if (content.trim().isEmpty) return;
-    final socketService = ref.read(socketProvider);
-    
-    socketService.emit('sendMessage', {
+    ref.read(socketProvider).emit('sendMessage', {
       'receiverId': _receiverId,
       'content': content,
     });
   }
 }
 
-// Global Auth Provider Family
-final chatProviderFamily = NotifierProvider.family<ChatNotifier, ChatState, String>(ChatNotifier.new);
+// Define the provider family using the Notifier
+final chatProviderFamily = NotifierProvider.family<ChatNotifier, ChatState, String>((id) {
+  return ChatNotifier();
+});
