@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../services/api_service.dart';
 import '../../services/storage_service.dart';
@@ -30,9 +31,9 @@ class AuthState {
 class AuthNotifier extends Notifier<AuthState> {
   @override
   AuthState build() {
-    // Initialize auth check without blocking
+    // Check for existing session in the background
     Future.microtask(() => checkAuth());
-    return AuthState();
+    return AuthState(isLoading: true);
   }
 
   Future<void> checkAuth() async {
@@ -42,13 +43,24 @@ class AuthNotifier extends Notifier<AuthState> {
     final token = await storage.getAccessToken();
     if (token != null) {
       try {
-        final response = await api.get('${ApiConstants.users}/me');
+        // Add a 3-second timeout to prevent getting stuck
+        final response = await api.get('${ApiConstants.users}/profile').timeout(
+          const Duration(seconds: 3),
+          onTimeout: () => throw TimeoutException('Connection timed out'),
+        );
+
         if (response.data['success']) {
-          state = state.copyWith(user: UserModel.fromJson(response.data['data']));
+          final user = UserModel.fromJson(response.data['data']);
+          state = state.copyWith(user: user, isLoading: false);
+        } else {
+          state = state.copyWith(isLoading: false);
         }
       } catch (e) {
-        await logout();
+        print('Auth check failed: $e');
+        state = state.copyWith(isLoading: false);
       }
+    } else {
+      state = state.copyWith(isLoading: false);
     }
   }
 

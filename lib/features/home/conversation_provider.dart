@@ -21,10 +21,10 @@ class ConversationModel {
 
   factory ConversationModel.fromJson(Map<String, dynamic> json) {
     return ConversationModel(
-      otherUserId: json['otherUser']['_id'],
-      otherUserName: json['otherUser']['name'],
-      lastMessage: json['lastMessage']['content'],
-      lastMessageTime: DateTime.parse(json['lastMessage']['createdAt']),
+      otherUserId: json['user']['_id'],
+      otherUserName: json['user']['name'],
+      lastMessage: json['lastMessage'],
+      lastMessageTime: DateTime.parse(json['lastMessageTime']),
     );
   }
 }

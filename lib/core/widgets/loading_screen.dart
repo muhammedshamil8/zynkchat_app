@@ -6,26 +6,47 @@ class LoadingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF0F172A), // Premium Deep Dark Slate
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Your Premium Logo
             Container(
-              width: 100,
-              height: 100,
-              padding: const EdgeInsets.all(20),
+              width: 140,
+              height: 140,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(35),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.5),
+                    blurRadius: 30,
+                    offset: const Offset(0, 15),
+                  ),
+                ],
               ),
-              child: const CircularProgressIndicator(strokeWidth: 2),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(35),
+                child: Image.asset('assets/images/logo.png', fit: BoxFit.cover),
+              ),
+            ),
+            const SizedBox(height: 48),
+            const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.indigoAccent),
+              ),
             ),
             const SizedBox(height: 24),
             Text(
-              'Initializing ZynkChat...',
+              'ZYNKCHAT',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.5),
-                letterSpacing: 1.2,
+                color: Colors.white.withOpacity(0.9),
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 4.0,
               ),
             ),
           ],
