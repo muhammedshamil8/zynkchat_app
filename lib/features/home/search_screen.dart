@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../auth/auth_provider.dart';
 import '../auth/user_model.dart';
+import '../chat/chat_screen.dart';
 import '../../core/constants/api_constants.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
@@ -69,7 +70,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 title: Text(user.name),
                 subtitle: Text(user.email),
                 onTap: () {
-                  // Navigate to Chat with this user
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChatScreen(receiver: user),
+                    ),
+                  );
                 },
               );
             },
