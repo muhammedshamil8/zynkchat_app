@@ -88,6 +88,22 @@ class ChatNotifier extends Notifier<ChatState> {
 
   void sendMessage(String content) {
     if (content.trim().isEmpty) return;
+    
+    final myUser = ref.read(authProvider).user;
+    if (myUser == null) return;
+
+    // Add message optimistically to the UI
+    final optimisticMessage = MessageModel(
+      id: 'temp-${DateTime.now().millisecondsSinceEpoch}',
+      sender: myUser.id,
+      receiver: _receiverId,
+      content: content,
+      status: MessageStatus.sent,
+      createdAt: DateTime.now(),
+    );
+
+    state = state.copyWith(messages: [...state.messages, optimisticMessage]);
+
     ref.read(socketProvider).emit('sendMessage', {
       'receiverId': _receiverId,
       'content': content,
