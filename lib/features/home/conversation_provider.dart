@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/auth/auth_provider.dart';
+import '../../services/socket_service.dart';
 import '../../core/constants/api_constants.dart';
+import '../../services/api_service.dart'; // Added missing api service import too
 
 class ConversationModel {
   final String otherUserId;
@@ -30,7 +32,11 @@ class ConversationModel {
 class ConversationNotifier extends Notifier<List<ConversationModel>> {
   @override
   List<ConversationModel> build() {
-    Future.microtask(() => fetchConversations());
+    Future.microtask(() {
+      fetchConversations();
+      // Listen for new messages to refresh the list
+      ref.read(socketProvider).messageStream.listen((_) => fetchConversations());
+    });
     return [];
   }
 

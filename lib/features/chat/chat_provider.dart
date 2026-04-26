@@ -5,12 +5,7 @@ import '../auth/auth_provider.dart';
 import 'message_model.dart';
 import '../../core/constants/api_constants.dart';
 
-// Service Provider
-final socketProvider = Provider((ref) {
-  final service = SocketService(ref.read(storageProvider));
-  service.connect();
-  return service;
-});
+
 
 class ChatState {
   final List<MessageModel> messages;
