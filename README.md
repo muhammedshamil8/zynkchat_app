@@ -51,4 +51,4 @@ A beautiful, premium real-time chat application built with **Flutter** and **Riv
 You can find the latest stable **APK** in the [Releases](https://github.com/muhammedshamil8/zynkchat_app/releases) section of this repository.
 
 ## 📜 License
-MIT License.
+MIT License
