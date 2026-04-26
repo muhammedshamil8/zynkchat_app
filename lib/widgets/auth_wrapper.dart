@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../features/auth/auth_provider.dart';
 import '../features/auth/login_screen.dart';
 import '../features/home/home_screen.dart';
-import '../core/widgets/loading_screen.dart';
+import '../core/widgets/skeleton_screen.dart';
 
 class AuthWrapper extends ConsumerWidget {
   const AuthWrapper({super.key});
@@ -13,7 +13,7 @@ class AuthWrapper extends ConsumerWidget {
     final authState = ref.watch(authProvider);
 
     if (authState.isLoading) {
-      return const LoadingScreen();
+      return const SkeletonScreen();
     }
 
     if (authState.user != null) {

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../services/api_service.dart';
 import '../../services/storage_service.dart';
@@ -43,23 +44,29 @@ class AuthNotifier extends Notifier<AuthState> {
     final token = await storage.getAccessToken();
     if (token != null) {
       try {
-        // Add a 3-second timeout to prevent getting stuck
+        print('💎 Attempting to restore session with token...');
+        // Increase timeout to 8 seconds for slower mobile networks
         final response = await api.get('${ApiConstants.users}/profile').timeout(
-          const Duration(seconds: 3),
-          onTimeout: () => throw TimeoutException('Connection timed out'),
+          const Duration(seconds: 8),
+          onTimeout: () => throw TimeoutException('Session verification timed out'),
         );
 
         if (response.data['success']) {
           final user = UserModel.fromJson(response.data['data']);
+          print('✅ Session restored for: ${user.name}');
           state = state.copyWith(user: user, isLoading: false);
         } else {
+          print('⚠️ Session invalid according to server');
           state = state.copyWith(isLoading: false);
         }
       } catch (e) {
-        print('Auth check failed: $e');
+        print('❌ Session recovery failed: $e');
+        // If it's a timeout, we might not want to clear EVERYTHING immediately, 
+        // but for safety, we allow the user to see the login screen if we can't verify.
         state = state.copyWith(isLoading: false);
       }
     } else {
+      print('ℹ️ No existing session token found');
       state = state.copyWith(isLoading: false);
     }
   }
@@ -115,9 +122,18 @@ class AuthNotifier extends Notifier<AuthState> {
         state = state.copyWith(user: user, isLoading: false);
         return true;
       }
+    } on DioException catch (e) {
+      String message = 'Login failed: Invalid email or password';
+      if (e.type == DioExceptionType.connectionTimeout) {
+        message = 'Connection timeout: Please check your network';
+      } else if (e.response?.statusCode == 401) {
+        message = 'Invalid email or password. Please try again.';
+      }
+      state = state.copyWith(isLoading: false, error: message);
+      SnackbarUtils.showError(message);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
-      SnackbarUtils.showError('Login failed: Invalid email or password');
+      SnackbarUtils.showError('Login failed: An unexpected error occurred');
     }
     return false;
   }
