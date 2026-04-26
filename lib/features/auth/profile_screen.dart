@@ -51,10 +51,7 @@ class ProfileScreen extends ConsumerWidget {
             ),
             const Spacer(),
             ElevatedButton(
-              onPressed: () {
-                ref.read(authProvider.notifier).logout();
-                Navigator.pop(context);
-              },
+              onPressed: () => _showLogoutConfirmation(context, ref),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.redAccent.withOpacity(0.1),
                 foregroundColor: Colors.redAccent,
@@ -64,6 +61,30 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: 20),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showLogoutConfirmation(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ref.read(authProvider.notifier).logout();
+              Navigator.pop(context); // Close profile screen
+            },
+            child: const Text('Logout', style: TextStyle(color: Colors.redAccent)),
+          ),
+        ],
       ),
     );
   }

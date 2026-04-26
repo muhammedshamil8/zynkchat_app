@@ -18,13 +18,19 @@ class MessageModel {
   });
 
   factory MessageModel.fromJson(Map<String, dynamic> json) {
+    // Backend can send populated user object OR just the ID string
+    String getUserId(dynamic userData) {
+      if (userData is Map) return userData['_id'] ?? '';
+      return userData.toString();
+    }
+
     return MessageModel(
-      id: json['_id'] ?? '',
-      sender: json['sender'] is Map ? json['sender']['_id'] : json['sender'],
-      receiver: json['receiver'] is Map ? json['receiver']['_id'] : json['receiver'],
-      content: json['content'],
-      status: parseStatus(json['status']),
-      createdAt: DateTime.parse(json['createdAt']),
+      id: json['_id'] ?? json['id'] ?? '',
+      sender: getUserId(json['sender'] ?? json['senderId']),
+      receiver: getUserId(json['receiver'] ?? json['receiverId']),
+      content: json['content'] ?? '',
+      status: parseStatus(json['status'] ?? 'sent'),
+      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()).toLocal(),
     );
   }
 

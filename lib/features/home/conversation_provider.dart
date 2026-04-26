@@ -14,7 +14,7 @@ class ConversationModel {
   ConversationModel({
     required this.otherUserId,
     required this.otherUserName,
-    required this.lastMessage,
+    this.lastMessage = '',
     required this.lastMessageTime,
     this.unreadCount = 0,
   });
@@ -23,8 +23,8 @@ class ConversationModel {
     return ConversationModel(
       otherUserId: json['user']['_id'],
       otherUserName: json['user']['name'],
-      lastMessage: json['lastMessage'],
-      lastMessageTime: DateTime.parse(json['lastMessageTime']),
+      lastMessage: json['lastMessage'] ?? '',
+      lastMessageTime: DateTime.parse(json['lastMessageTime'] ?? DateTime.now().toIso8601String()).toLocal(),
     );
   }
 }

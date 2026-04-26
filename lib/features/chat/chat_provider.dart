@@ -37,14 +37,14 @@ class ChatNotifier extends Notifier<ChatState> {
   void _setupListeners() {
     final socketService = ref.read(socketProvider);
     
-    socketService.socket.on('newMessage', (data) {
+    socketService.socket.on('receive_message', (data) {
       final message = MessageModel.fromJson(data);
       if (message.sender == _receiverId || message.receiver == _receiverId) {
         state = state.copyWith(messages: [...state.messages, message]);
       }
     });
 
-    socketService.socket.on('messageStatusUpdate', (data) {
+    socketService.socket.on('message_status_update', (data) {
       final String messageId = data['messageId'];
       final String status = data['status'];
       
@@ -99,7 +99,7 @@ class ChatNotifier extends Notifier<ChatState> {
 
     state = state.copyWith(messages: [...state.messages, optimisticMessage]);
 
-    ref.read(socketProvider).emit('sendMessage', {
+    ref.read(socketProvider).emit('send_message', {
       'receiverId': _receiverId,
       'content': content,
     });

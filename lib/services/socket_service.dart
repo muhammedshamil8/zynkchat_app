@@ -33,7 +33,8 @@ class SocketService {
     _socket.onDisconnect((_) => print('❌ Disconnected from Socket Server'));
     _socket.onConnectError((err) => print('⚠️ Connection Error: $err'));
 
-    _socket.on('newMessage', (data) => _messageController.add(data));
+    _socket.on('receive_message', (data) => _messageController.add(data));
+    _socket.on('message_sent', (data) => _messageController.add(data));
   }
 
   void emit(String event, dynamic data) {
