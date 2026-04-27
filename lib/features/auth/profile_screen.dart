@@ -51,7 +51,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     final conversations = ref.watch(conversationProvider);
 
     final initials = user != null && user.name.isNotEmpty
-        ? user.name.trim().split(' ').map((w) => w[0]).take(2).join().toUpperCase()
+        ? user.name.trim().split(' ').where((w) => w.isNotEmpty).map((w) => w[0]).take(2).join().toUpperCase()
         : 'U';
 
     return Scaffold(
@@ -308,8 +308,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   }
 
   Widget _buildInfoCard(dynamic user) {
-    final lastSeenText = user?.lastSeen != null
-        ? DateFormat('MMM d, yyyy • hh:mm a').format(user!.lastSeen!)
+    final lastSeen = user?.lastSeen as DateTime?;
+    final lastSeenText = lastSeen != null
+        ? DateFormat('MMM d, yyyy • hh:mm a').format(lastSeen)
         : '—';
 
     return Container(
@@ -399,7 +400,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           return Column(
             children: [
               InkWell(
-                onTap: () {},
+                onTap: () {
+                  // TODO: implement navigation for this settings item
+                },
                 borderRadius: BorderRadius.vertical(
                   top: index == 0 ? const Radius.circular(20) : Radius.zero,
                   bottom: index == items.length - 1
